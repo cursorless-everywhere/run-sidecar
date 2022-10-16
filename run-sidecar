@@ -22,7 +22,7 @@ POSITIONAL_ARGS=()
 while test $# -gt 0; do
     case "$1" in
         -h | --help)
-            echo "run-sidecar - Provision and run the cursorless sidecar against a vscode extensions directory."
+            echo "run-sidecar - Provision and run the cursorless sidecar against a VS Code extensions directory."
             echo " "
             echo "run-sidecar [OPTION]... [EXTENSION_DIR]"
             echo " "
