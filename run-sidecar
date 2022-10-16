@@ -28,8 +28,8 @@ while test $# -gt 0; do
             echo " "
             echo "options:"
             echo "-h, --help                    show brief help"
-            echo "-c, --cursorless-revision     use a specific revision of the cursorless fork"
-            echo "-s, --sidecar-revision        use a specific revision of the cursorless sidecar"
+            echo "-c, --cursorless-revision     use a specific revision (branch or commit SHA) of the cursorless fork"
+            echo "-s, --sidecar-revision        use a specific revision (branch or commit SHA) of the cursorless sidecar"
             exit 0
             ;;
         -c | --cursorless-revision)
