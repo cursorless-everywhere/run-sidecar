@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CURSORLESS_FORK_REPO="git@github.com:cursorless-everywhere/cursorless.git"
+CURSORLESS_FORK_REV="main"
+CURSORLESS_FORK_NAME="pokey-phillco.cursorless-fork"
+
+CURSORLESS_SIDECAR_REPO="git@github.com:cursorless-everywhere/sidecar.git"
+CURSORLESS_SIDECAR_REV="main"
+CURSORLESS_SIDECAR_NAME="phillco.cursorless-sidecar"
+
+if ! [ -x "$(command -v code)" ]; then
+    echo 'ERROR: VSCode cli is not installed. Please install VSCode https://code.visualstudio.com/download and ensure `code` CLI is available https://code.visualstudio.com/docs/editor/command-line#_launching-from-command-line' >&2
+    exit 1
+elif ! [ -x "$(command -v yarn)" ]; then
+    echo 'ERROR: yarn is not installed. Please install yarn https://yarnpkg.com/getting-started/install' >&2
+    exit 1
+fi
+
+POSITIONAL_ARGS=()
+
+while test $# -gt 0; do
+    case "$1" in
+        -h | --help)
+            echo "run-sidecar - Provision and run the cursorless sidecar against a VS Code extensions directory."
+            echo " "
+            echo "run-sidecar [OPTION]... [EXTENSION_DIR]"
+            echo " "
+            echo "options:"
+            echo "-h, --help                    show brief help"
+            echo "-c, --cursorless-revision     use a specific revision (branch or commit SHA) of the cursorless fork"
+            echo "-s, --sidecar-revision        use a specific revision (branch or commit SHA) of the cursorless sidecar"
+            exit 0
+            ;;
+        -c | --cursorless-revision)
+            CURSORLESS_FORK_REV="$2"
+            shift
+            shift
+            ;;
+        -s | --sidecar-revision)
+            CURSORLESS_SIDECAR_REV="$2"
+            shift
+            shift
+            ;;
+        *)
+            POSITIONAL_ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+
+set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+
+EXTENSIONS_DIR="$(realpath $1)"
+shift
+
+CODE=$(which code)
+YARN="yarn --silent "
+FLAGS=" --extensions-dir $EXTENSIONS_DIR"
+
+package_and_install() {
+    echo -e "\033[0;34minstalling $1@$2\033[0m"
+
+    BUILD_DIR=$(mktemp -d)
+    cd "$BUILD_DIR"
+
+    git clone "$1" .
+    git checkout "$2"
+
+    $YARN
+    $YARN add vsce
+    set +e
+    yes | ./node_modules/.bin/vsce package --out "$3.vsix"
+    $CODE $FLAGS --uninstall-extension "$3"
+    set -e
+
+    $CODE $FLAGS --install-extension "./$3.vsix"
+}
+
+$CODE $FLAGS --install-extension pokey.command-server
+$CODE $FLAGS --install-extension pokey.talon
+package_and_install "$CURSORLESS_FORK_REPO" "$CURSORLESS_FORK_REV" "$CURSORLESS_FORK_NAME"
+package_and_install "$CURSORLESS_SIDECAR_REPO" "$CURSORLESS_SIDECAR_REV" "$CURSORLESS_SIDECAR_NAME"
+
+$CODE $FLAGS "$(mktemp -d)"
