@@ -10,7 +10,7 @@ CURSORLESS_SIDECAR_REV="main"
 CURSORLESS_SIDECAR_NAME="phillco.cursorless-sidecar"
 
 if ! [ -x "$(command -v code)" ]; then
-    echo 'Error: code is not installed.' >&2
+    echo 'ERROR: VSCode cli is not installed. Please install VSCode https://code.visualstudio.com/download and ensure `code` CLI is available https://code.visualstudio.com/docs/editor/command-line#_launching-from-command-line' >&2
     exit 1
 elif ! [ -x "$(command -v yarn)" ]; then
     echo 'ERROR: yarn is not installed. Please install yarn https://yarnpkg.com/getting-started/install' >&2
